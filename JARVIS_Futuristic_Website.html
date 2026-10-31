@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>J.A.R.V.I.S. — Personal AI Interface</title>
+<style>
+:root{--bg:#05091c;--panel:#0a1740;--blue:#147dff;--cyan:#00eaff;--text:#eef6ff;--muted:#91b9ef}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 42%,#071fc0 0,#071044 42%,#030716 100%);font-family:Arial,sans-serif;color:var(--text);min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 5%;background:#08112ae8;border-bottom:1px solid #1767ff}
+.brand{font-size:30px;font-weight:900;letter-spacing:6px}.brand small{display:block;font-size:11px;letter-spacing:3px;color:var(--cyan);margin-top:6px}.status{color:#50ffd3;font-size:11px;letter-spacing:1px}
+.wrap{max-width:1120px;margin:auto;padding:24px 22px}.welcome{text-align:center;padding:18px 0 26px}.reactor{width:70px;height:70px;border:3px solid #098cff;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;box-shadow:0 0 28px #087bff}.reactor div{width:42px;height:42px;border:3px solid var(--cyan);border-radius:50%;box-shadow:0 0 20px var(--cyan)}
+h1{font-size:clamp(25px,4vw,40px);margin:8px 0;letter-spacing:1px}.welcome p{font-size:12px;letter-spacing:2px;color:#aacbff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card,.chat{background:#071744bb;border:1px solid #2677ff;border-radius:18px;box-shadow:inset 0 0 18px #092e8b88}.card{padding:18px 20px}.label{font-size:11px;letter-spacing:1.5px;color:#a6c9ff;font-weight:bold}.value{font-size:24px;font-weight:bold;margin:14px 0}.bar{height:6px;background:#123b8b;border-radius:10px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),#277dff);width:30%}
+.chat{margin-top:20px;padding:20px}.chathead{display:flex;justify-content:space-between;align-items:center;gap:12px}.chathead h2{font-size:18px;letter-spacing:1px}.ready{font-size:11px;color:#4bffd4}.messages{height:270px;overflow:auto;padding:12px;background:#030a21a8;border:1px solid #164ca7;border-radius:10px}.msg{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;padding:10px 12px;margin:7px 0;border-left:3px solid #00cfff;background:#0a2455aa;border-radius:5px}.who{font-weight:bold;color:#67eaff}.user{border-left-color:#a9aaff}.entry{display:flex;gap:9px;margin-top:12px}.entry input{flex:1;min-width:0;background:#020a20;border:1px solid #2875ff;border-radius:8px;color:white;padding:14px;font-size:15px}.btn,button{background:linear-gradient(100deg,#086bff,#0642b8);color:white;border:1px solid #238aff;border-radius:8px;padding:12px 16px;font-weight:bold;cursor:pointer}.btn:disabled{opacity:.6}.controls,.quick{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.note{font-size:11px;color:#9bb7e4;margin-top:12px}footer{text-align:center;color:#81a7df;padding:22px;font-size:11px;letter-spacing:1px}
+@media(max-width:650px){.stats{grid-template-columns:1fr}.entry{flex-wrap:wrap}.entry input{flex-basis:100%}.brand{font-size:24px}}
+</style></head>
+<body>
+<header><div class="brand">J.A.R.V.I.S.<small>PERSONAL AI INTERFACE</small></div><div class="status" id="connection">● CONNECTING</div></header>
+<main class="wrap">
+<section class="welcome"><div class="reactor"><div></div></div><h1>WELCOME, COMMANDER</h1><p>YOUR PERSONAL INTELLIGENCE SYSTEM</p></section>
+<section class="stats">
+<div class="card"><div class="label">CPU STATUS</div><div class="value" id="cpu">-- %</div><div class="bar"><span id="cpuBar"></span></div></div>
+<div class="card"><div class="label">MEMORY</div><div class="value" id="memory">-- GB</div><div class="bar"><span id="memBar"></span></div></div>
+<div class="card"><div class="label">AI ENGINE</div><div class="value" id="model">QWEN 2.5:3B</div><div class="bar"><span style="width:65%"></span></div></div>
+</section>
+<section class="chat"><div class="chathead"><h2>◈ JARVIS CONVERSATION</h2><span class="ready" id="ready">● READY</span></div>
+<div class="messages" id="messages" aria-live="polite"><div class="msg"><span class="who">JARVIS:</span> Welcome, Commander. सवाल लिखिए या माइक्रोफ़ोन दबाकर बोलिए। ताज़ा खबरों के लिए स्रोत लिंक देने की कोशिश करूँगा।</div></div>
+<div class="entry"><input id="prompt" placeholder="Type a question or command..." autocomplete="off"><button id="send" class="btn">SEND ➤</button></div>
+<div class="controls"><button id="voice" type="button">🎙 SPEAK</button><button id="stopVoice" type="button">🔇 STOP VOICE</button></div>
+<div class="quick"><button data-prompt="Reply in simple English. What is 2 plus 2?">TEST AI</button><button data-prompt="आज भारत की ताज़ा खबरें बताओ और हर खबर का स्रोत लिंक दो।">INDIA NEWS</button><button data-prompt="नमस्ते JARVIS">GREET JARVIS</button></div>
+<div class="note">Local AI runs on this computer. Live news search needs an internet connection. Voice input is supported in compatible Chrome browsers; allow microphone permission when prompted.</div>
+</section></main><footer>J.A.R.V.I.S. • LOCAL AI • WELCOME, COMMANDER</footer>
+<script>
+const messages=document.getElementById('messages'), box=document.getElementById('prompt'), sendBtn=document.getElementById('send');
+function addMessage(who,text,cls=''){const d=document.createElement('div');d.className='msg '+cls;const w=document.createElement('span');w.className='who';w.textContent=who+':';d.append(w,document.createTextNode(' '+text));messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d;}
+function speak(text){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=/[\u0900-\u097F]/.test(text)?'hi-IN':'en-IN';window.speechSynthesis.speak(u);}
+async function sendMessage(textOverride){const message=(textOverride||box.value).trim();if(!message)return;box.value='';addMessage('YOU',message,'user');const pending=addMessage('JARVIS','सोच रहा हूँ...');sendBtn.disabled=true;document.getElementById('ready').textContent='● THINKING';try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Server error');pending.replaceChildren();const w=document.createElement('span');w.className='who';w.textContent='JARVIS:';pending.append(w,document.createTextNode(' '+(data.reply||'जवाब नहीं मिला।')));speak(data.reply||'');}catch(e){pending.replaceChildren();const w=document.createElement('span');w.className='who';w.textContent='JARVIS:';pending.append(w,document.createTextNode(' '+e.message));}finally{sendBtn.disabled=false;document.getElementById('ready').textContent='● READY';messages.scrollTop=messages.scrollHeight;box.focus();}}
+sendBtn.addEventListener('click',()=>sendMessage());box.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage()});document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>sendMessage(b.dataset.prompt)));
+document.getElementById('stopVoice').addEventListener('click',()=>window.speechSynthesis?.cancel());
+document.getElementById('voice').addEventListener('click',()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addMessage('JARVIS','इस ब्राउज़र में voice input उपलब्ध नहीं है। Chrome में कोशिश करें।');return;}const rec=new SR();rec.lang='hi-IN';rec.interimResults=false;rec.maxAlternatives=1;addMessage('JARVIS','सुन रहा हूँ…');rec.onresult=e=>sendMessage(e.results[0][0].transcript);rec.onerror=e=>addMessage('JARVIS','माइक्रोफ़ोन समस्या: '+e.error+'. Chrome की microphone permission जाँचें।');rec.start();});
+async function loadStatus(){try{const r=await fetch('/api/status');const d=await r.json();document.getElementById('connection').textContent='● LOCAL AI CONNECTED';document.getElementById('model').textContent=(d.model||'qwen2.5:3b').toUpperCase();document.getElementById('cpu').textContent=d.cpu+' %';document.getElementById('cpuBar').style.width=Math.min(100,d.cpu)+'%';document.getElementById('memory').textContent=d.memory_used+' / '+d.memory_total+' GB';document.getElementById('memBar').style.width=Math.min(100,d.memory_used/d.memory_total*100)+'%';}catch(e){document.getElementById('connection').textContent='● START SERVER TO CONNECT';}}
+loadStatus();setInterval(loadStatus,5000);
+</script></body></html>
